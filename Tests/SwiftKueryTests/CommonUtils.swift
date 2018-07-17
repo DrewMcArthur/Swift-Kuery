@@ -28,6 +28,8 @@ import SwiftKuery
 
 class TestConnection: Connection {
 
+    var connectionPoolConnection: ConnectionPoolConnection?
+
     let queryBuilder: QueryBuilder
     let result: Result
 
@@ -177,9 +179,9 @@ class TestConnection: Connection {
             case .returnEmpty:
                 onCompletion(.successNoData)
             case .returnOneRow:
-                onCompletion(.resultSet(ResultSet(TestResultFetcher(numberOfRows: 1), connection: self, connectionWrapper: nil)))
+                onCompletion(.resultSet(ResultSet(TestResultFetcher(numberOfRows: 1))))
             case .returnThreeRows:
-                onCompletion(.resultSet(ResultSet(TestResultFetcher(numberOfRows: 3), connection: self, connectionWrapper: nil)))
+                onCompletion(.resultSet(ResultSet(TestResultFetcher(numberOfRows: 3))))
             case .returnError:
                 onCompletion(.error(QueryError.noResult("Error in query execution.")))
             case .returnValue:
