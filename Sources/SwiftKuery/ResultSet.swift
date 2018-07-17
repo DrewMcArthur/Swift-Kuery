@@ -20,8 +20,7 @@
 public struct ResultSet {
     private var resultFetcher: ResultFetcher
     
-    private (set) var connection: Connection? = nil
-    private (set) var connectionPoolWrapper: ConnectionPoolConnection? = nil
+    internal (set) var connectionPoolWrapper: ConnectionPoolConnection? = nil
 
     /// The query result as a Sequence of rows. This API is blocking.
     public private (set) var rows: RowSequence
@@ -29,11 +28,9 @@ public struct ResultSet {
     /// Instantiate an instance of ResultSet.
     ///
     /// - Parameter resultFetcher: An implementation of `ResultFetcher` protocol to fetch the query results.
-    public init(_ resultFetcher: ResultFetcher, connection: Connection, connectionWrapper: ConnectionPoolConnection?) {
+    public init(_ resultFetcher: ResultFetcher) {
         self.resultFetcher = resultFetcher
         rows = RowSequence(resultFetcher)
-        self.connection = connection
-        self.connectionPoolWrapper = connectionWrapper
     }
     
     /// Fetch the next row of the query result. This function is non-blocking.
@@ -52,7 +49,6 @@ public struct ResultSet {
 
     /// Called to indicate no further operations will be called on the result set.
     public mutating func done() {
-        self.connection = nil
         self.connectionPoolWrapper = nil
     }
 }

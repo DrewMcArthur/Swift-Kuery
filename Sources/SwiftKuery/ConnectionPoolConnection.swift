@@ -35,6 +35,8 @@ import Dispatch
  */
 public class ConnectionPoolConnection: Connection {
 
+    public var connectionPoolConnection: ConnectionPoolConnection?
+
     private var connection: Connection?
     private weak var pool: ConnectionPool?
  
@@ -47,7 +49,6 @@ public class ConnectionPoolConnection: Connection {
     init(connection: Connection, pool: ConnectionPool) {
         self.connection = connection
         self.pool = pool
-        self.connection?.setConnectionPoolWrapper(to: self)
     }
     
     deinit {
@@ -56,27 +57,21 @@ public class ConnectionPoolConnection: Connection {
         }
     }
 
-    public func setConnectionPoolWrapper(to wrapper: ConnectionPoolConnection?) {
-        return
-    }
-
     // MARK: Connections
     /// Establish a connection with the database.
     ///
     /// - Parameter onCompletion: The function to be called when the connection is established.
     public func connect(onCompletion: @escaping (QueryError?) -> ()) {
-        DispatchQueue.global().async {
-            if let _ = self.connection {
+        if let _ = self.connection {
+            onCompletion(nil)
+        }
+        else {
+            if let newConnection = self.pool?.take() {
+                self.connection = newConnection
                 onCompletion(nil)
             }
             else {
-                if let newConnection = self.pool?.getConnection() {
-                    self.connection = newConnection
-                    onCompletion(nil)
-                }
-                else {
-                    onCompletion(.connection("Failed to get connection"))
-                }
+                onCompletion(.connection("Failed to get connection"))
             }
         }
     }
@@ -136,12 +131,19 @@ public class ConnectionPoolConnection: Connection {
     /// - Parameter query: The query to execute.
     /// - Parameter onCompletion: The function to be called when the execution of the query has completed.
     public func execute(query: Query, onCompletion: @escaping ((QueryResult) -> ())) {
-        DispatchQueue.global().async {
-            guard let connection = self.connection else {
-                onCompletion(.error(QueryError.connection("Connection is disconnected")))
-                return
+        guard let connection = self.connection else {
+            onCompletion(.error(QueryError.connection("Connection is disconnected")))
+            return
+        }
+        connection.connectionPoolConnection = self
+        connection.execute(query: query) { result in
+            var queryResult: QueryResult = result
+            if var resultSet = result.asResultSet {
+                resultSet.connectionPoolWrapper = self
+                queryResult = QueryResult.resultSet(resultSet)
             }
-            connection.execute(query: query, onCompletion: onCompletion)
+            connection.connectionPoolConnection = nil
+            onCompletion(queryResult)
         }
     }
 
@@ -168,12 +170,19 @@ public class ConnectionPoolConnection: Connection {
     /// - Parameter raw: A string that contains the query to execute.
     /// - Parameter onCompletion: The function to be called when the execution of the query has completed.
     public func execute(_ raw: String, onCompletion: @escaping ((QueryResult) -> ())) {
-        DispatchQueue.global().async {
-            guard let connection = self.connection else {
-                onCompletion(.error(QueryError.connection("Connection is disconnected")))
-                return
+        guard let connection = self.connection else {
+            onCompletion(.error(QueryError.connection("Connection is disconnected")))
+            return
+        }
+        connection.connectionPoolConnection = self
+        connection.execute(raw) { result in
+            var queryResult: QueryResult = result
+            if var resultSet = result.asResultSet {
+                resultSet.connectionPoolWrapper = self
+                queryResult = QueryResult.resultSet(resultSet)
             }
-            connection.execute(raw, onCompletion: onCompletion)
+            connection.connectionPoolConnection = nil
+            onCompletion(queryResult)
         }
     }
 
@@ -201,12 +210,19 @@ public class ConnectionPoolConnection: Connection {
     /// - Parameter parameters: An array of the parameters.
     /// - Parameter onCompletion: The function to be called when the execution of the query has completed.
     public func execute(query: Query, parameters: [Any?], onCompletion: @escaping ((QueryResult) -> ())) {
-        DispatchQueue.global().async {
-            guard let connection = self.connection else {
-                onCompletion(.error(QueryError.connection("Connection is disconnected")))
-                return
+        guard let connection = self.connection else {
+            onCompletion(.error(QueryError.connection("Connection is disconnected")))
+            return
+        }
+        connection.connectionPoolConnection = self
+        connection.execute(query: query, parameters: parameters) { result in
+            var queryResult: QueryResult = result
+            if var resultSet = result.asResultSet {
+                resultSet.connectionPoolWrapper = self
+                queryResult = QueryResult.resultSet(resultSet)
             }
-            connection.execute(query: query, parameters: parameters, onCompletion: onCompletion)
+            connection.connectionPoolConnection = nil
+            onCompletion(queryResult)
         }
     }
 
@@ -235,12 +251,19 @@ public class ConnectionPoolConnection: Connection {
     /// - Parameter parameters: An array of the parameters.
     /// - Parameter onCompletion: The function to be called when the execution of the query has completed.
     public func execute(_ raw: String, parameters: [Any?], onCompletion: @escaping ((QueryResult) -> ())) {
-        DispatchQueue.global().async {
-            guard let connection = self.connection else {
-                onCompletion(.error(QueryError.connection("Connection is disconnected")))
-                return
+        guard let connection = self.connection else {
+            onCompletion(.error(QueryError.connection("Connection is disconnected")))
+            return
+        }
+        connection.connectionPoolConnection = self
+        connection.execute(raw, parameters: parameters) { result in
+            var queryResult: QueryResult = result
+            if var resultSet = result.asResultSet {
+                resultSet.connectionPoolWrapper = self
+                queryResult = QueryResult.resultSet(resultSet)
             }
-            connection.execute(raw, parameters: parameters, onCompletion: onCompletion)
+            connection.connectionPoolConnection = nil
+            onCompletion(queryResult)
         }
     }
 
@@ -269,12 +292,19 @@ public class ConnectionPoolConnection: Connection {
     /// - Parameter parameters: A dictionary of the parameters with parameter names as the keys.
     /// - Parameter onCompletion: The function to be called when the execution of the query has completed.
     public func execute(query: Query, parameters: [String:Any?], onCompletion: @escaping ((QueryResult) -> ())) {
-        DispatchQueue.global().async {
-            guard let connection = self.connection else {
-                onCompletion(.error(QueryError.connection("Connection is disconnected")))
-                return
+        guard let connection = self.connection else {
+            onCompletion(.error(QueryError.connection("Connection is disconnected")))
+            return
+        }
+        connection.connectionPoolConnection = self
+        connection.execute(query: query, parameters: parameters) { result in
+            var queryResult: QueryResult = result
+            if var resultSet = result.asResultSet {
+                resultSet.connectionPoolWrapper = self
+                queryResult = QueryResult.resultSet(resultSet)
             }
-            connection.execute(query: query, parameters: parameters, onCompletion: onCompletion)
+            connection.connectionPoolConnection = nil
+            onCompletion(queryResult)
         }
     }
 
@@ -303,12 +333,19 @@ public class ConnectionPoolConnection: Connection {
     /// - Parameter parameters: A dictionary of the parameters with parameter names as the keys.
     /// - Parameter onCompletion: The function to be called when the execution of the query has completed.
     public func execute(_ raw: String, parameters: [String:Any?], onCompletion: @escaping ((QueryResult) -> ())) {
-        DispatchQueue.global().async {
-            guard let connection = self.connection else {
-                onCompletion(.error(QueryError.connection("Connection is disconnected")))
-                return
+        guard let connection = self.connection else {
+            onCompletion(.error(QueryError.connection("Connection is disconnected")))
+            return
+        }
+        connection.connectionPoolConnection = self
+        connection.execute(raw, parameters: parameters) { result in
+            var queryResult: QueryResult = result
+            if var resultSet = result.asResultSet {
+                resultSet.connectionPoolWrapper = self
+                queryResult = QueryResult.resultSet(resultSet)
             }
-            connection.execute(raw, parameters: parameters, onCompletion: onCompletion)
+            connection.connectionPoolConnection = nil
+            onCompletion(queryResult)
         }
     }
 
@@ -362,12 +399,19 @@ public class ConnectionPoolConnection: Connection {
     /// - Parameter preparedStatement: The prepared statement to execute.
     /// - Parameter onCompletion: The function to be called when the execution has completed.
     public func execute(preparedStatement: PreparedStatement, onCompletion: @escaping ((QueryResult) -> ())) {
-        DispatchQueue.global().async {
-            guard let connection = self.connection else {
-                onCompletion(.error(QueryError.connection("Connection is disconnected")))
-                return
+        guard let connection = self.connection else {
+            onCompletion(.error(QueryError.connection("Connection is disconnected")))
+            return
+        }
+        connection.connectionPoolConnection = self
+        connection.execute(preparedStatement: preparedStatement) { result in
+            var queryResult: QueryResult = result
+            if var resultSet = result.asResultSet {
+                resultSet.connectionPoolWrapper = self
+                queryResult = QueryResult.resultSet(resultSet)
             }
-            connection.execute(preparedStatement: preparedStatement, onCompletion: onCompletion)
+            connection.connectionPoolConnection = nil
+            onCompletion(queryResult)
         }
     }
 
@@ -395,12 +439,19 @@ public class ConnectionPoolConnection: Connection {
     /// - Parameter parameters: An array of the parameters.
     /// - Parameter onCompletion: The function to be called when the execution has completed.
     public func execute(preparedStatement: PreparedStatement, parameters: [Any?], onCompletion: @escaping ((QueryResult) -> ())) {
-        DispatchQueue.global().async {
-            guard let connection = self.connection else {
-                onCompletion(.error(QueryError.connection("Connection is disconnected")))
-                return
+        guard let connection = self.connection else {
+            onCompletion(.error(QueryError.connection("Connection is disconnected")))
+            return
+        }
+        connection.connectionPoolConnection = self
+        connection.execute(preparedStatement: preparedStatement, parameters: parameters) { result in
+            var queryResult: QueryResult = result
+            if var resultSet = result.asResultSet {
+                resultSet.connectionPoolWrapper = self
+                queryResult = QueryResult.resultSet(resultSet)
             }
-            connection.execute(preparedStatement: preparedStatement, parameters: parameters, onCompletion: onCompletion)
+            connection.connectionPoolConnection = nil
+            onCompletion(queryResult)
         }
     }
 
@@ -429,12 +480,19 @@ public class ConnectionPoolConnection: Connection {
     /// - Parameter parameters: A dictionary of the parameters with parameter names as the keys.
     /// - Parameter onCompletion: The function to be called when the execution has completed.
     public func execute(preparedStatement: PreparedStatement, parameters: [String:Any?], onCompletion: @escaping ((QueryResult) -> ())) {
-        DispatchQueue.global().async {
-            guard let connection = self.connection else {
-                onCompletion(.error(QueryError.connection("Connection is disconnected")))
-                return
+        guard let connection = self.connection else {
+            onCompletion(.error(QueryError.connection("Connection is disconnected")))
+            return
+        }
+        connection.connectionPoolConnection = self
+        connection.execute(preparedStatement: preparedStatement, parameters: parameters) { result in
+            var queryResult: QueryResult = result
+            if var resultSet = result.asResultSet {
+                resultSet.connectionPoolWrapper = self
+                queryResult = QueryResult.resultSet(resultSet)
             }
-            connection.execute(preparedStatement: preparedStatement, parameters: parameters, onCompletion: onCompletion)
+            connection.connectionPoolConnection = nil
+            onCompletion(queryResult)
         }
     }
 
@@ -462,12 +520,19 @@ public class ConnectionPoolConnection: Connection {
     /// - Parameter preparedStatement: The prepared statement to release.
     /// - Parameter onCompletion: The function to be called when the execution has completed.
     public func release(preparedStatement: PreparedStatement, onCompletion: @escaping ((QueryResult) -> ())) {
-        DispatchQueue.global().async {
-            guard let connection = self.connection else {
-                onCompletion(.error(QueryError.connection("Connection is disconnected")))
-                return
+        guard let connection = self.connection else {
+            onCompletion(.error(QueryError.connection("Connection is disconnected")))
+            return
+        }
+        connection.connectionPoolConnection = self
+        connection.release(preparedStatement: preparedStatement) { result in
+            var queryResult: QueryResult = result
+            if var resultSet = result.asResultSet {
+                resultSet.connectionPoolWrapper = self
+                queryResult = QueryResult.resultSet(resultSet)
             }
-            connection.release(preparedStatement: preparedStatement, onCompletion: onCompletion)
+            connection.connectionPoolConnection = nil
+            onCompletion(queryResult)
         }
     }
 
@@ -509,12 +574,19 @@ public class ConnectionPoolConnection: Connection {
     ///
     /// - Parameter onCompletion: The function to be called when the execution of the start transaction command has completed.
     public func startTransaction(onCompletion: @escaping ((QueryResult) -> ())) {
-        DispatchQueue.global().async {
-            guard let connection = self.connection else {
-                onCompletion(.error(QueryError.connection("Connection is disconnected")))
-                return
+        guard let connection = self.connection else {
+            onCompletion(.error(QueryError.connection("Connection is disconnected")))
+            return
+        }
+        connection.connectionPoolConnection = self
+        connection.startTransaction() { result in
+            var queryResult: QueryResult = result
+            if var resultSet = result.asResultSet {
+                resultSet.connectionPoolWrapper = self
+                queryResult = QueryResult.resultSet(resultSet)
             }
-            connection.startTransaction(onCompletion: onCompletion)
+            connection.connectionPoolConnection = nil
+            onCompletion(queryResult)
         }
     }
 
@@ -539,12 +611,19 @@ public class ConnectionPoolConnection: Connection {
     ///
     /// - Parameter onCompletion: The function to be called when the execution of the commit transaction command has completed.
     public func commit(onCompletion: @escaping ((QueryResult) -> ())) {
-        DispatchQueue.global().async {
-            guard let connection = self.connection else {
-                onCompletion(.error(QueryError.connection("Connection is disconnected")))
-                return
+        guard let connection = self.connection else {
+            onCompletion(.error(QueryError.connection("Connection is disconnected")))
+            return
+        }
+        connection.connectionPoolConnection = self
+        connection.commit() { result in
+            var queryResult: QueryResult = result
+            if var resultSet = result.asResultSet {
+                resultSet.connectionPoolWrapper = self
+                queryResult = QueryResult.resultSet(resultSet)
             }
-            connection.commit(onCompletion: onCompletion)
+            connection.connectionPoolConnection = nil
+            onCompletion(queryResult)
         }
     }
 
@@ -569,12 +648,19 @@ public class ConnectionPoolConnection: Connection {
     ///
     /// - Parameter onCompletion: The function to be called when the execution of the rollback transaction command has completed.
     public func rollback(onCompletion: @escaping ((QueryResult) -> ())) {
-        DispatchQueue.global().async {
-            guard let connection = self.connection else {
-                onCompletion(.error(QueryError.connection("Connection is disconnected")))
-                return
+        guard let connection = self.connection else {
+            onCompletion(.error(QueryError.connection("Connection is disconnected")))
+            return
+        }
+        connection.connectionPoolConnection = self
+        connection.rollback() { result in
+            var queryResult: QueryResult = result
+            if var resultSet = result.asResultSet {
+                resultSet.connectionPoolWrapper = self
+                queryResult = QueryResult.resultSet(resultSet)
             }
-            connection.rollback(onCompletion: onCompletion)
+            connection.connectionPoolConnection = nil
+            onCompletion(queryResult)
         }
     }
 
@@ -600,12 +686,19 @@ public class ConnectionPoolConnection: Connection {
     /// - Parameter savepoint: The name to  be given to the created savepoint.
     /// - Parameter onCompletion: The function to be called when the execution of the create savepoint command has completed.
     public func create(savepoint: String, onCompletion: @escaping ((QueryResult) -> ())) {
-        DispatchQueue.global().async {
-            guard let connection = self.connection else {
-                onCompletion(.error(QueryError.connection("Connection is disconnected")))
-                return
+        guard let connection = self.connection else {
+            onCompletion(.error(QueryError.connection("Connection is disconnected")))
+            return
+        }
+        connection.connectionPoolConnection = self
+        connection.create(savepoint: savepoint) { result in
+            var queryResult: QueryResult = result
+            if var resultSet = result.asResultSet {
+                resultSet.connectionPoolWrapper = self
+                queryResult = QueryResult.resultSet(resultSet)
             }
-            connection.create(savepoint: savepoint, onCompletion: onCompletion)
+            connection.connectionPoolConnection = nil
+            onCompletion(queryResult)
         }
     }
 
@@ -632,12 +725,19 @@ public class ConnectionPoolConnection: Connection {
     /// - Parameter to savepoint: The name of the savepoint to rollback to.
     /// - Parameter onCompletion: The function to be called when the execution of the rollback transaction command has completed.
     public func rollback(to savepoint: String, onCompletion: @escaping ((QueryResult) -> ())) {
-        DispatchQueue.global().async {
-            guard let connection = self.connection else {
-                onCompletion(.error(QueryError.connection("Connection is disconnected")))
-                return
+        guard let connection = self.connection else {
+            onCompletion(.error(QueryError.connection("Connection is disconnected")))
+            return
+        }
+        connection.connectionPoolConnection = self
+        connection.rollback(to: savepoint) { result in
+            var queryResult: QueryResult = result
+            if var resultSet = result.asResultSet {
+                resultSet.connectionPoolWrapper = self
+                queryResult = QueryResult.resultSet(resultSet)
             }
-            connection.rollback(to: savepoint, onCompletion: onCompletion)
+            connection.connectionPoolConnection = nil
+            onCompletion(queryResult)
         }
     }
 
@@ -664,12 +764,19 @@ public class ConnectionPoolConnection: Connection {
     /// - Parameter savepoint: The name of the savepoint to release.
     /// - Parameter onCompletion: The function to be called when the execution of the release savepoint command has completed.
     public func release(savepoint: String, onCompletion: @escaping ((QueryResult) -> ())) {
-        DispatchQueue.global().async {
-            guard let connection = self.connection else {
-                onCompletion(.error(QueryError.connection("Connection is disconnected")))
-                return
+        guard let connection = self.connection else {
+            onCompletion(.error(QueryError.connection("Connection is disconnected")))
+            return
+        }
+        connection.connectionPoolConnection = self
+        connection.release(savepoint: savepoint) { result in
+            var queryResult: QueryResult = result
+            if var resultSet = result.asResultSet {
+                resultSet.connectionPoolWrapper = self
+                queryResult = QueryResult.resultSet(resultSet)
             }
-            connection.release(savepoint: savepoint, onCompletion: onCompletion)
+            connection.connectionPoolConnection = nil
+            onCompletion(queryResult)
         }
     }
 

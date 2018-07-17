@@ -19,8 +19,11 @@ import Dispatch
 // MARK: Connection protocol
 
 /// Defines the protocol which all database plugins must implement.
-public protocol Connection {
+public protocol Connection : class {
 
+    // A reference to a wrapping ConnectionPoolConnection
+    var connectionPoolConnection: ConnectionPoolConnection? { get set }
+    
     /// The `QueryBuilder` with connection specific substitutions.
     var queryBuilder: QueryBuilder { get }
     
@@ -39,11 +42,6 @@ public protocol Connection {
 
     /// An indication whether there is a connection to the database.
     var isConnected: Bool { get }
-
-    /// Set a weak reference to a wrapping ConnectionPoolConnection
-    ///
-    /// - Parameter to: A ConnectionPoolConnection instance.
-    func setConnectionPoolWrapper(to wrapper: ConnectionPoolConnection?)
 
     /// Execute a query.
     ///
@@ -280,15 +278,18 @@ public extension Connection {
                         }
                     }
                     else {
+                        self.connectionPoolConnection = nil
                         onCompletion(.error(QueryError.syntaxError("Failed to map parameters.")))
                     }
                 }
                 self.execute(convertedQuery, parameters: numberedParameters, onCompletion: onCompletion)
             }
             catch  QueryError.syntaxError(let error) {
+                self.connectionPoolConnection = nil
                 onCompletion(.error(QueryError.syntaxError(error)))
             }
             catch {
+                self.connectionPoolConnection = nil
                 onCompletion(.error(QueryError.syntaxError("Failed to build the query.")))
             }
         }
