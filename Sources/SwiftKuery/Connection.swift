@@ -275,18 +275,15 @@ public extension Connection {
                         }
                     }
                     else {
-                        self.connectionPoolConnection = nil
                         onCompletion(.error(QueryError.syntaxError("Failed to map parameters.")))
                     }
                 }
                 self.execute(convertedQuery, parameters: numberedParameters, onCompletion: onCompletion)
             }
             catch  QueryError.syntaxError(let error) {
-                self.connectionPoolConnection = nil
                 onCompletion(.error(QueryError.syntaxError(error)))
             }
             catch {
-                self.connectionPoolConnection = nil
                 onCompletion(.error(QueryError.syntaxError("Failed to build the query.")))
             }
         }
