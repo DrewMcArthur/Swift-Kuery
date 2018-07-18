@@ -134,14 +134,7 @@ public class ConnectionPoolConnection: Connection {
             return
         }
         connection.execute(query: query) { result in
-            var queryResult: QueryResult = result
-            if let resultSet = result.asResultSet {
-                resultSet.connectionPoolWrapper = self
-                queryResult = QueryResult.resultSet(resultSet)
-            }
-            DispatchQueue.global().async {
-                onCompletion(queryResult)
-            }
+            self.runCompletionHandler(result: result, onCompletion: onCompletion)
         }
     }
 
@@ -173,14 +166,7 @@ public class ConnectionPoolConnection: Connection {
             return
         }
         connection.execute(raw) { result in
-            var queryResult: QueryResult = result
-            if let resultSet = result.asResultSet {
-                resultSet.connectionPoolWrapper = self
-                queryResult = QueryResult.resultSet(resultSet)
-            }
-            DispatchQueue.global().async {
-                onCompletion(queryResult)
-            }
+            self.runCompletionHandler(result: result, onCompletion: onCompletion)
         }
     }
 
@@ -213,14 +199,7 @@ public class ConnectionPoolConnection: Connection {
             return
         }
         connection.execute(query: query, parameters: parameters) { result in
-            var queryResult: QueryResult = result
-            if let resultSet = result.asResultSet {
-                resultSet.connectionPoolWrapper = self
-                queryResult = QueryResult.resultSet(resultSet)
-            }
-            DispatchQueue.global().async {
-                onCompletion(queryResult)
-            }
+            self.runCompletionHandler(result: result, onCompletion: onCompletion)
         }
     }
 
@@ -254,14 +233,7 @@ public class ConnectionPoolConnection: Connection {
             return
         }
         connection.execute(raw, parameters: parameters) { result in
-            var queryResult: QueryResult = result
-            if let resultSet = result.asResultSet {
-                resultSet.connectionPoolWrapper = self
-                queryResult = QueryResult.resultSet(resultSet)
-            }
-            DispatchQueue.global().async {
-                onCompletion(queryResult)
-            }
+            self.runCompletionHandler(result: result, onCompletion: onCompletion)
         }
     }
 
@@ -295,14 +267,7 @@ public class ConnectionPoolConnection: Connection {
             return
         }
         connection.execute(query: query, parameters: parameters) { result in
-            var queryResult: QueryResult = result
-            if let resultSet = result.asResultSet {
-                resultSet.connectionPoolWrapper = self
-                queryResult = QueryResult.resultSet(resultSet)
-            }
-            DispatchQueue.global().async {
-                onCompletion(queryResult)
-            }
+            self.runCompletionHandler(result: result, onCompletion: onCompletion)
         }
     }
 
@@ -336,14 +301,7 @@ public class ConnectionPoolConnection: Connection {
             return
         }
         connection.execute(raw, parameters: parameters) { result in
-            var queryResult: QueryResult = result
-            if let resultSet = result.asResultSet {
-                resultSet.connectionPoolWrapper = self
-                queryResult = QueryResult.resultSet(resultSet)
-            }
-            DispatchQueue.global().async {
-                onCompletion(queryResult)
-            }
+            self.runCompletionHandler(result: result, onCompletion: onCompletion)
         }
     }
 
@@ -402,14 +360,7 @@ public class ConnectionPoolConnection: Connection {
             return
         }
         connection.execute(preparedStatement: preparedStatement) { result in
-            var queryResult: QueryResult = result
-            if let resultSet = result.asResultSet {
-                resultSet.connectionPoolWrapper = self
-                queryResult = QueryResult.resultSet(resultSet)
-            }
-            DispatchQueue.global().async {
-                onCompletion(queryResult)
-            }
+            self.runCompletionHandler(result: result, onCompletion: onCompletion)
         }
     }
 
@@ -442,14 +393,7 @@ public class ConnectionPoolConnection: Connection {
             return
         }
         connection.execute(preparedStatement: preparedStatement, parameters: parameters) { result in
-            var queryResult: QueryResult = result
-            if let resultSet = result.asResultSet {
-                resultSet.connectionPoolWrapper = self
-                queryResult = QueryResult.resultSet(resultSet)
-            }
-            DispatchQueue.global().async {
-                onCompletion(queryResult)
-            }
+            self.runCompletionHandler(result: result, onCompletion: onCompletion)
         }
     }
 
@@ -483,14 +427,7 @@ public class ConnectionPoolConnection: Connection {
             return
         }
         connection.execute(preparedStatement: preparedStatement, parameters: parameters) { result in
-            var queryResult: QueryResult = result
-            if let resultSet = result.asResultSet {
-                resultSet.connectionPoolWrapper = self
-                queryResult = QueryResult.resultSet(resultSet)
-            }
-            DispatchQueue.global().async {
-                onCompletion(queryResult)
-            }
+            self.runCompletionHandler(result: result, onCompletion: onCompletion)
         }
     }
 
@@ -523,14 +460,7 @@ public class ConnectionPoolConnection: Connection {
             return
         }
         connection.release(preparedStatement: preparedStatement) { result in
-            var queryResult: QueryResult = result
-            if let resultSet = result.asResultSet {
-                resultSet.connectionPoolWrapper = self
-                queryResult = QueryResult.resultSet(resultSet)
-            }
-            DispatchQueue.global().async {
-                onCompletion(queryResult)
-            }
+            self.runCompletionHandler(result: result, onCompletion: onCompletion)
         }
     }
 
@@ -577,14 +507,7 @@ public class ConnectionPoolConnection: Connection {
             return
         }
         connection.startTransaction() { result in
-            var queryResult: QueryResult = result
-            if let resultSet = result.asResultSet {
-                resultSet.connectionPoolWrapper = self
-                queryResult = QueryResult.resultSet(resultSet)
-            }
-            DispatchQueue.global().async {
-                onCompletion(queryResult)
-            }
+            self.runCompletionHandler(result: result, onCompletion: onCompletion)
         }
     }
 
@@ -614,14 +537,7 @@ public class ConnectionPoolConnection: Connection {
             return
         }
         connection.commit() { result in
-            var queryResult: QueryResult = result
-            if let resultSet = result.asResultSet {
-                resultSet.connectionPoolWrapper = self
-                queryResult = QueryResult.resultSet(resultSet)
-            }
-            DispatchQueue.global().async {
-                onCompletion(queryResult)
-            }
+            self.runCompletionHandler(result: result, onCompletion: onCompletion)
         }
     }
 
@@ -651,14 +567,7 @@ public class ConnectionPoolConnection: Connection {
             return
         }
         connection.rollback() { result in
-            var queryResult: QueryResult = result
-            if let resultSet = result.asResultSet {
-                resultSet.connectionPoolWrapper = self
-                queryResult = QueryResult.resultSet(resultSet)
-            }
-            DispatchQueue.global().async {
-                onCompletion(queryResult)
-            }
+            self.runCompletionHandler(result: result, onCompletion: onCompletion)
         }
     }
 
@@ -689,14 +598,7 @@ public class ConnectionPoolConnection: Connection {
             return
         }
         connection.create(savepoint: savepoint) { result in
-            var queryResult: QueryResult = result
-            if let resultSet = result.asResultSet {
-                resultSet.connectionPoolWrapper = self
-                queryResult = QueryResult.resultSet(resultSet)
-            }
-            DispatchQueue.global().async {
-                onCompletion(queryResult)
-            }
+            self.runCompletionHandler(result: result, onCompletion: onCompletion)
         }
     }
 
@@ -728,14 +630,7 @@ public class ConnectionPoolConnection: Connection {
             return
         }
         connection.rollback(to: savepoint) { result in
-            var queryResult: QueryResult = result
-            if let resultSet = result.asResultSet {
-                resultSet.connectionPoolWrapper = self
-                queryResult = QueryResult.resultSet(resultSet)
-            }
-            DispatchQueue.global().async {
-                onCompletion(queryResult)
-            }
+            self.runCompletionHandler(result: result, onCompletion: onCompletion)
         }
     }
 
@@ -767,14 +662,7 @@ public class ConnectionPoolConnection: Connection {
             return
         }
         connection.release(savepoint: savepoint) { result in
-            var queryResult: QueryResult = result
-            if let resultSet = result.asResultSet {
-                resultSet.connectionPoolWrapper = self
-                queryResult = QueryResult.resultSet(resultSet)
-            }
-            DispatchQueue.global().async {
-                onCompletion(queryResult)
-            }
+            self.runCompletionHandler(result: result, onCompletion: onCompletion)
         }
     }
 
@@ -794,5 +682,17 @@ public class ConnectionPoolConnection: Connection {
             return .error(QueryError.noResult("No QueryResult from execute"))
         }
         return resultUnwrapped
+    }
+
+    // Offload the passed closure keeping self in scope
+    // By calling this function to offload the passed closure we keep the connection wrapper in scope and prevent it being returned to the pool early by virtue of the fact self has to be captured in the calling closure.
+    // The funxction also stores a reference to the wrapper on any ResultSet that is being returned which prevents a connection being returned to the pool until ResultSet.done() is called.
+    private func runCompletionHandler(result: QueryResult, onCompletion: @escaping ((QueryResult) -> ())) {
+        if let resultSet = result.asResultSet {
+            resultSet.connectionPoolWrapper = self
+        }
+        DispatchQueue.global().async {
+            onCompletion(result)
+        }
     }
 }
