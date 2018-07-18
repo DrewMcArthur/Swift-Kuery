@@ -17,7 +17,7 @@
 // MARK: ResultSet
 
 /// Represents a query result set. The rows are accessable either in a blocking fashion using a `RowSequence` or in a non-blocking fashion using nextRow() function.
-public struct ResultSet {
+public class ResultSet {
     private var resultFetcher: ResultFetcher
     
     internal (set) var connectionPoolWrapper: ConnectionPoolConnection? = nil
@@ -48,7 +48,7 @@ public struct ResultSet {
     }
 
     /// Called to indicate no further operations will be called on the result set.
-    public mutating func done() {
+    public func done() {
         self.connectionPoolWrapper = nil
     }
 }

@@ -73,7 +73,7 @@ public enum QueryResult {
     /// the result contains three columns named 'a', the dictionary will contain the keys: a, a.1 and a.2.
     public var asRows: [[String:Any?]]? {
         switch self {
-        case .resultSet(var resultSet):
+        case .resultSet(let resultSet):
             let z = resultSet.rows.map { zip(resultSet.titles, $0) }
             let arrayOfDictionaries = z.map { row -> [String:Any?] in
                 var dictionary = [String:Any?]()

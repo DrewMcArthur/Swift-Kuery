@@ -35,8 +35,6 @@ import Dispatch
  */
 public class ConnectionPoolConnection: Connection {
 
-    public var connectionPoolConnection: ConnectionPoolConnection?
-
     private var connection: Connection?
     private weak var pool: ConnectionPool?
  
@@ -135,15 +133,15 @@ public class ConnectionPoolConnection: Connection {
             onCompletion(.error(QueryError.connection("Connection is disconnected")))
             return
         }
-        connection.connectionPoolConnection = self
         connection.execute(query: query) { result in
             var queryResult: QueryResult = result
-            if var resultSet = result.asResultSet {
+            if let resultSet = result.asResultSet {
                 resultSet.connectionPoolWrapper = self
                 queryResult = QueryResult.resultSet(resultSet)
             }
-            connection.connectionPoolConnection = nil
-            onCompletion(queryResult)
+            DispatchQueue.global().async {
+                onCompletion(queryResult)
+            }
         }
     }
 
@@ -174,15 +172,15 @@ public class ConnectionPoolConnection: Connection {
             onCompletion(.error(QueryError.connection("Connection is disconnected")))
             return
         }
-        connection.connectionPoolConnection = self
         connection.execute(raw) { result in
             var queryResult: QueryResult = result
-            if var resultSet = result.asResultSet {
+            if let resultSet = result.asResultSet {
                 resultSet.connectionPoolWrapper = self
                 queryResult = QueryResult.resultSet(resultSet)
             }
-            connection.connectionPoolConnection = nil
-            onCompletion(queryResult)
+            DispatchQueue.global().async {
+                onCompletion(queryResult)
+            }
         }
     }
 
@@ -214,15 +212,15 @@ public class ConnectionPoolConnection: Connection {
             onCompletion(.error(QueryError.connection("Connection is disconnected")))
             return
         }
-        connection.connectionPoolConnection = self
         connection.execute(query: query, parameters: parameters) { result in
             var queryResult: QueryResult = result
-            if var resultSet = result.asResultSet {
+            if let resultSet = result.asResultSet {
                 resultSet.connectionPoolWrapper = self
                 queryResult = QueryResult.resultSet(resultSet)
             }
-            connection.connectionPoolConnection = nil
-            onCompletion(queryResult)
+            DispatchQueue.global().async {
+                onCompletion(queryResult)
+            }
         }
     }
 
@@ -255,15 +253,15 @@ public class ConnectionPoolConnection: Connection {
             onCompletion(.error(QueryError.connection("Connection is disconnected")))
             return
         }
-        connection.connectionPoolConnection = self
         connection.execute(raw, parameters: parameters) { result in
             var queryResult: QueryResult = result
-            if var resultSet = result.asResultSet {
+            if let resultSet = result.asResultSet {
                 resultSet.connectionPoolWrapper = self
                 queryResult = QueryResult.resultSet(resultSet)
             }
-            connection.connectionPoolConnection = nil
-            onCompletion(queryResult)
+            DispatchQueue.global().async {
+                onCompletion(queryResult)
+            }
         }
     }
 
@@ -296,15 +294,15 @@ public class ConnectionPoolConnection: Connection {
             onCompletion(.error(QueryError.connection("Connection is disconnected")))
             return
         }
-        connection.connectionPoolConnection = self
         connection.execute(query: query, parameters: parameters) { result in
             var queryResult: QueryResult = result
-            if var resultSet = result.asResultSet {
+            if let resultSet = result.asResultSet {
                 resultSet.connectionPoolWrapper = self
                 queryResult = QueryResult.resultSet(resultSet)
             }
-            connection.connectionPoolConnection = nil
-            onCompletion(queryResult)
+            DispatchQueue.global().async {
+                onCompletion(queryResult)
+            }
         }
     }
 
@@ -337,15 +335,15 @@ public class ConnectionPoolConnection: Connection {
             onCompletion(.error(QueryError.connection("Connection is disconnected")))
             return
         }
-        connection.connectionPoolConnection = self
         connection.execute(raw, parameters: parameters) { result in
             var queryResult: QueryResult = result
-            if var resultSet = result.asResultSet {
+            if let resultSet = result.asResultSet {
                 resultSet.connectionPoolWrapper = self
                 queryResult = QueryResult.resultSet(resultSet)
             }
-            connection.connectionPoolConnection = nil
-            onCompletion(queryResult)
+            DispatchQueue.global().async {
+                onCompletion(queryResult)
+            }
         }
     }
 
@@ -403,15 +401,15 @@ public class ConnectionPoolConnection: Connection {
             onCompletion(.error(QueryError.connection("Connection is disconnected")))
             return
         }
-        connection.connectionPoolConnection = self
         connection.execute(preparedStatement: preparedStatement) { result in
             var queryResult: QueryResult = result
-            if var resultSet = result.asResultSet {
+            if let resultSet = result.asResultSet {
                 resultSet.connectionPoolWrapper = self
                 queryResult = QueryResult.resultSet(resultSet)
             }
-            connection.connectionPoolConnection = nil
-            onCompletion(queryResult)
+            DispatchQueue.global().async {
+                onCompletion(queryResult)
+            }
         }
     }
 
@@ -443,15 +441,15 @@ public class ConnectionPoolConnection: Connection {
             onCompletion(.error(QueryError.connection("Connection is disconnected")))
             return
         }
-        connection.connectionPoolConnection = self
         connection.execute(preparedStatement: preparedStatement, parameters: parameters) { result in
             var queryResult: QueryResult = result
-            if var resultSet = result.asResultSet {
+            if let resultSet = result.asResultSet {
                 resultSet.connectionPoolWrapper = self
                 queryResult = QueryResult.resultSet(resultSet)
             }
-            connection.connectionPoolConnection = nil
-            onCompletion(queryResult)
+            DispatchQueue.global().async {
+                onCompletion(queryResult)
+            }
         }
     }
 
@@ -484,15 +482,15 @@ public class ConnectionPoolConnection: Connection {
             onCompletion(.error(QueryError.connection("Connection is disconnected")))
             return
         }
-        connection.connectionPoolConnection = self
         connection.execute(preparedStatement: preparedStatement, parameters: parameters) { result in
             var queryResult: QueryResult = result
-            if var resultSet = result.asResultSet {
+            if let resultSet = result.asResultSet {
                 resultSet.connectionPoolWrapper = self
                 queryResult = QueryResult.resultSet(resultSet)
             }
-            connection.connectionPoolConnection = nil
-            onCompletion(queryResult)
+            DispatchQueue.global().async {
+                onCompletion(queryResult)
+            }
         }
     }
 
@@ -524,15 +522,15 @@ public class ConnectionPoolConnection: Connection {
             onCompletion(.error(QueryError.connection("Connection is disconnected")))
             return
         }
-        connection.connectionPoolConnection = self
         connection.release(preparedStatement: preparedStatement) { result in
             var queryResult: QueryResult = result
-            if var resultSet = result.asResultSet {
+            if let resultSet = result.asResultSet {
                 resultSet.connectionPoolWrapper = self
                 queryResult = QueryResult.resultSet(resultSet)
             }
-            connection.connectionPoolConnection = nil
-            onCompletion(queryResult)
+            DispatchQueue.global().async {
+                onCompletion(queryResult)
+            }
         }
     }
 
@@ -578,15 +576,15 @@ public class ConnectionPoolConnection: Connection {
             onCompletion(.error(QueryError.connection("Connection is disconnected")))
             return
         }
-        connection.connectionPoolConnection = self
         connection.startTransaction() { result in
             var queryResult: QueryResult = result
-            if var resultSet = result.asResultSet {
+            if let resultSet = result.asResultSet {
                 resultSet.connectionPoolWrapper = self
                 queryResult = QueryResult.resultSet(resultSet)
             }
-            connection.connectionPoolConnection = nil
-            onCompletion(queryResult)
+            DispatchQueue.global().async {
+                onCompletion(queryResult)
+            }
         }
     }
 
@@ -615,15 +613,15 @@ public class ConnectionPoolConnection: Connection {
             onCompletion(.error(QueryError.connection("Connection is disconnected")))
             return
         }
-        connection.connectionPoolConnection = self
         connection.commit() { result in
             var queryResult: QueryResult = result
-            if var resultSet = result.asResultSet {
+            if let resultSet = result.asResultSet {
                 resultSet.connectionPoolWrapper = self
                 queryResult = QueryResult.resultSet(resultSet)
             }
-            connection.connectionPoolConnection = nil
-            onCompletion(queryResult)
+            DispatchQueue.global().async {
+                onCompletion(queryResult)
+            }
         }
     }
 
@@ -652,15 +650,15 @@ public class ConnectionPoolConnection: Connection {
             onCompletion(.error(QueryError.connection("Connection is disconnected")))
             return
         }
-        connection.connectionPoolConnection = self
         connection.rollback() { result in
             var queryResult: QueryResult = result
-            if var resultSet = result.asResultSet {
+            if let resultSet = result.asResultSet {
                 resultSet.connectionPoolWrapper = self
                 queryResult = QueryResult.resultSet(resultSet)
             }
-            connection.connectionPoolConnection = nil
-            onCompletion(queryResult)
+            DispatchQueue.global().async {
+                onCompletion(queryResult)
+            }
         }
     }
 
@@ -690,15 +688,15 @@ public class ConnectionPoolConnection: Connection {
             onCompletion(.error(QueryError.connection("Connection is disconnected")))
             return
         }
-        connection.connectionPoolConnection = self
         connection.create(savepoint: savepoint) { result in
             var queryResult: QueryResult = result
-            if var resultSet = result.asResultSet {
+            if let resultSet = result.asResultSet {
                 resultSet.connectionPoolWrapper = self
                 queryResult = QueryResult.resultSet(resultSet)
             }
-            connection.connectionPoolConnection = nil
-            onCompletion(queryResult)
+            DispatchQueue.global().async {
+                onCompletion(queryResult)
+            }
         }
     }
 
@@ -729,15 +727,15 @@ public class ConnectionPoolConnection: Connection {
             onCompletion(.error(QueryError.connection("Connection is disconnected")))
             return
         }
-        connection.connectionPoolConnection = self
         connection.rollback(to: savepoint) { result in
             var queryResult: QueryResult = result
-            if var resultSet = result.asResultSet {
+            if let resultSet = result.asResultSet {
                 resultSet.connectionPoolWrapper = self
                 queryResult = QueryResult.resultSet(resultSet)
             }
-            connection.connectionPoolConnection = nil
-            onCompletion(queryResult)
+            DispatchQueue.global().async {
+                onCompletion(queryResult)
+            }
         }
     }
 
@@ -768,15 +766,15 @@ public class ConnectionPoolConnection: Connection {
             onCompletion(.error(QueryError.connection("Connection is disconnected")))
             return
         }
-        connection.connectionPoolConnection = self
         connection.release(savepoint: savepoint) { result in
             var queryResult: QueryResult = result
-            if var resultSet = result.asResultSet {
+            if let resultSet = result.asResultSet {
                 resultSet.connectionPoolWrapper = self
                 queryResult = QueryResult.resultSet(resultSet)
             }
-            connection.connectionPoolConnection = nil
-            onCompletion(queryResult)
+            DispatchQueue.global().async {
+                onCompletion(queryResult)
+            }
         }
     }
 
